@@ -47,4 +47,45 @@ class PaymentServiceImplTest {
         System.out.println(preAuthedPayment);
 
     }
+
+    @Transactional
+    @Test
+    void auth() {
+        Payment savedPayment = paymentService.newPayment(payment);
+
+        System.out.println("Should be NEW: " + savedPayment.getState());
+
+        StateMachine<PaymentState, PaymentEvent> sm = paymentService.preAuth(savedPayment.getId());
+
+        System.out.println("Should be PRE_AUTH");
+        System.out.println(sm.getState().getId());
+
+        StateMachine<PaymentState, PaymentEvent> sm2 = paymentService.authorizePayment(savedPayment.getId());
+
+        System.out.println("Should be AUTH: " + sm2.getState().getId());
+
+        Payment preAuthedPayment = paymentRepository.getOne(savedPayment.getId());
+        System.out.println(preAuthedPayment);
+    }
+
+    @Transactional
+    @Test
+    void authError() {
+        Payment savedPayment = paymentService.newPayment(payment);
+
+        System.out.println("Should be NEW: " + savedPayment.getState());
+
+        StateMachine<PaymentState, PaymentEvent> sm = paymentService.preAuth(savedPayment.getId());
+
+        System.out.println("Should be PRE_AUTH");
+        System.out.println(sm.getState().getId());
+
+        StateMachine<PaymentState, PaymentEvent> sm2 = paymentService.declineAuth(savedPayment.getId());
+
+        System.out.println("Should be AUTH_ERROR: " + sm2.getState().getId());
+
+        Payment preAuthedPayment = paymentRepository.getOne(savedPayment.getId());
+        System.out.println(preAuthedPayment);
+
+    }
 }
